@@ -15,8 +15,6 @@ const timer = ms => new Promise(resolve => setTimeout(resolve, ms));
 async function getThird(page, category1, category2) {
   const checkLength3 = await page.$$(`${selector} > div:nth-child(3) > ul > li`);
 
-  // console.log('세 번째 카테고리 갯수 : ', checkLength3.length);
-
   const content = await page.content();
   const $ = cheerio.load(content);
   const third = $(`${selector} > div:nth-child(3) > ul > li`);
@@ -33,14 +31,6 @@ async function getThird(page, category1, category2) {
     data3.push(temp);
   });
 
-  console.log(data3);
-
-  fs.writeFile(`./data/category/003-${category2}-${category1}.json`, JSON.stringify(data3, null, 2), error => {
-    if (error) {
-      console.log('파일 생성 실패 ', error);
-    }
-  });
-
   for (let i = 1; i <= checkLength3.length; i++) {
     console.log('첫 번째 카테고리 ', category1, '두 번째 카테고리 ', category2, ' 세 번째 카테고리 ', i,'번째');
 
@@ -54,7 +44,7 @@ async function getThird(page, category1, category2) {
       const $ = cheerio.load(content);
       const fourth = $(`${selector} > div:nth-child(4) > ul > li`);
 
-      console.log('네 번째 카테고리 갯수 : ', fourth);
+      console.log('네 번째 카테고리 갯수 : ', fourth.length);
     
       fourth.each((idx, category) => {
         const temp = {};
@@ -67,14 +57,6 @@ async function getThird(page, category1, category2) {
     
         data4.push(temp);
       });
-    
-      console.log(data4);
-    
-      fs.writeFile(`./data/category/004-${i}-${category2}-${category1}.json`, JSON.stringify(data4, null, 2), error => {
-        if (error) {
-          console.log('파일 생성 실패 ', error);
-        }
-      });
     }
 
     await timer(200);
@@ -83,8 +65,6 @@ async function getThird(page, category1, category2) {
 
 async function getSecond(page, category1) {
   const checkLength2 = await page.$$(`${selector} > div:nth-child(2) > ul > li`);
-
-  // console.log('두 번째 카테고리 갯수 : ', checkLength2.length);
 
   const content = await page.content();
   const $ = cheerio.load(content);
@@ -102,14 +82,6 @@ async function getSecond(page, category1) {
     data2.push(temp);
   });
 
-  console.log(data2);
-
-  fs.writeFile(`./data/category/002-${category1}.json`, JSON.stringify(data2, null, 2), error => {
-    if (error) {
-      console.log('파일 생성 실패 ', error);
-    }
-  });
-
   for (let i = 1; i <= checkLength2.length; i++) {
     await page.click(`${selector} > div:nth-child(2)`);
     await page.click(`${selector} > div:nth-child(2) > ul > li:nth-child(${i})`);
@@ -123,33 +95,31 @@ async function getSecond(page, category1) {
 }
 
 async function getFirst(page) {
-  const checkLength1 = await page.$$(
-    `${selector} > div:nth-child(1) > ul > li`,
-  );
+  const checkLength1 = await page.$$(`${selector} > div:nth-child(1) > ul > li`);
 
-  console.log('첫 번째 카테고리 갯수 : ', checkLength1.length);
+  // console.log('첫 번째 카테고리 갯수 : ', checkLength1.length);
 
-  const content = await page.content();
-  const $ = cheerio.load(content);
-  const first = $(`${selector} > div:nth-child(1) > ul > li`);
+  // const content = await page.content();
+  // const $ = cheerio.load(content);
+  // const first = $(`${selector} > div:nth-child(1) > ul > li`);
 
-  first.each((idx, category) => {
-    const temp = {};
+  // first.each((idx, category) => {
+  //   const temp = {};
 
-    const title = $(category).find('a').text();
-    const dataid = $(category).find('a').get();
+  //   const title = $(category).find('a').text();
+  //   const dataid = $(category).find('a').get();
 
-    temp.cid = dataid[0].attribs['data-cid'];
-    temp.categoryName = title;
+  //   temp.cid = dataid[0].attribs['data-cid'];
+  //   temp.categoryName = title;
 
-    data1.push(temp);
-  });
+  //   data1.push(temp);
+  // });
 
-  fs.writeFile(`./data/category/001.json`, JSON.stringify(data1, null, 2), error => {
-    if (error) {
-      console.log('파일 생성 실패 ', error);
-    }
-  });
+  // fs.writeFile(`./data/category/001.json`, JSON.stringify(data1, null, 2), error => {
+  //   if (error) {
+  //     console.log('파일 생성 실패 ', error);
+  //   }
+  // });
 
   for (let i = 1; i <= checkLength1.length; i++) {
     await page.click(`${selector} > div:nth-child(1)`);
@@ -161,6 +131,26 @@ async function getFirst(page) {
 
     await timer(500);
   }
+
+  fs.writeFile(`./data/category/002.json`, JSON.stringify(data2, null, 2), error => {
+    if (error) {
+      console.log('파일 생성 실패 ', error);
+    }
+  });
+
+  fs.writeFile(`./data/category/003.json`, JSON.stringify(data3, null, 2), error => {
+    if (error) {
+      console.log('파일 생성 실패 ', error);
+    }
+  });
+
+  fs.writeFile(`./data/category/004.json`, JSON.stringify(data4, null, 2), error => {
+    if (error) {
+      console.log('파일 생성 실패 ', error);
+    }
+  });
+
+  await timer(500);
 }
 
 function getCategory() {
