@@ -36,7 +36,9 @@ async function getKeywordFourth(page, depth2, depth3, depth4) {
       const href = $(data).find('a').get();
       const rank = $(data).find('span.rank_top1000_num').text();
   
-      temp.link = href[0].attribs['href'];
+      temp.cid = href[0].attribs['href'];
+      temp.cid = temp['cid'].split('&cid=');
+      temp.cid = temp['cid'][1];
       temp.keyword = keyword.replace(rank, '');
       temp.keyword = temp['keyword'].replace('\\n', '');
       temp.keyword = temp['keyword'].trim();
@@ -81,7 +83,9 @@ async function getKeyword(page, depth2, depth3) {
       const href = $(data).find('a').get();
       const rank = $(data).find('span.rank_top1000_num').text();
   
-      temp.link = href[0].attribs['href'];
+      temp.cid = href[0].attribs['href'];
+      temp.cid = temp['cid'].split('&cid=');
+      temp.cid = temp['cid'][1];
       temp.keyword = keyword.replace(rank, '');
       temp.keyword = temp['keyword'].replace('\\n', '');
       temp.keyword = temp['keyword'].trim();
@@ -108,57 +112,81 @@ async function getKeyword(page, depth2, depth3) {
   await timer(150);
 }
 
-async function click(page) {
-  await page.click(`${categorySelector} > div:nth-child(1)`);
-  await page.click(`${categorySelector} > div:nth-child(1) > ul > li:nth-child(1)`);
+async function select(page) {
+  for (let idx = 2; idx <= 11; idx++) {
+    await timer(1000);
+    await page.click(`${categorySelector} > div:nth-child(1)`);
+    await timer(1000);
+    await page.click(`${categorySelector} > div:nth-child(1) > ul > li:nth-child(${idx})`);
 
-  const checkLength2 = await page.$$(`${categorySelector} > div:nth-child(2) > ul > li`);
-  console.log('두 번째 카테고리 갯수:: ', checkLength2.length);
-  
-  for (let i = 1; i <= checkLength2.length; i++) {
-    await page.click(`${categorySelector} > div:nth-child(2)`);
-    await page.click(`${categorySelector} > div:nth-child(2) > ul > li:nth-child(${i})`);
+    await timer(1000);
 
-    await timer(150);
+    const checkLength2 = await page.$$(
+      `${categorySelector} > div:nth-child(2) > ul > li`,
+    );
+    console.log('[', idx, ']', '두 번째 카테고리 갯수:: ', checkLength2.length);
 
-    const checkLength3 = await page.$$(`${categorySelector} > div:nth-child(3) > ul > li`);
-    console.log('세 번째 카테고리 갯수:: ', checkLength3.length);
+    for (let i = 1; i <= checkLength2.length; i++) {
+      await page.click(`${categorySelector} > div:nth-child(2)`);
+      await page.click(`${categorySelector} > div:nth-child(2) > ul > li:nth-child(${i})`);
 
-    for (let j = 1; j <= checkLength3.length; j++) {
-      await page.click(`${categorySelector} > div:nth-child(3)`);
-      await page.click(`${categorySelector} > div:nth-child(3) > ul > li:nth-child(${j})`);
-  
-      await timer(250);
-  
+      await timer(150);
+
       await page.click(searchButton);
-  
-      await timer(250);
-  
-      await getKeyword(page, i, j);
-
-      if (await page.$(`${categorySelector} > div:nth-child(4)`)) {
-        console.log('!! 네 번째 카테고리 있음 !!');
-
-        await timer(250);
-        
-        const checkLength4 = await page.$$(`${categorySelector} > div:nth-child(4) > ul > li`);
-        for (let k = 1; k <= checkLength4.length; k++) {
-          await page.click(`${categorySelector} > div:nth-child(4)`);
-          await page.click(`${categorySelector} > div:nth-child(4) > ul > li:nth-child(${k})`);
-      
-          await timer(250);
-      
-          await page.click(searchButton);
-
-          await timer(250);
-
-          await getKeywordFourth(page, i, j, k);
-
-          await timer(250);
-        }
-      }
 
       await timer(250);
+
+      await getKeyword(page, null, i);
+
+      await timer(150);
+
+      // const checkLength3 = await page.$$(
+      //   `${categorySelector} > div:nth-child(3) > ul > li`,
+      // );
+      // console.log('세 번째 카테고리 갯수:: ', checkLength3.length);
+
+      // for (let j = 1; j <= checkLength3.length; j++) {
+      //   await page.click(`${categorySelector} > div:nth-child(3)`);
+      //   await page.click(
+      //     `${categorySelector} > div:nth-child(3) > ul > li:nth-child(${j})`,
+      //   );
+
+      //   await timer(250);
+
+      //   await page.click(searchButton);
+
+      //   await timer(250);
+
+      //   await getKeyword(page, i, j);
+
+      //   if (await page.$(`${categorySelector} > div:nth-child(4)`)) {
+      //     console.log('!! 네 번째 카테고리 있음 !!');
+
+      //     await timer(250);
+
+      //     const checkLength4 = await page.$$(
+      //       `${categorySelector} > div:nth-child(4) > ul > li`,
+      //     );
+      //     for (let k = 1; k <= checkLength4.length; k++) {
+      //       await page.click(`${categorySelector} > div:nth-child(4)`);
+      //       await page.click(
+      //         `${categorySelector} > div:nth-child(4) > ul > li:nth-child(${k})`,
+      //       );
+
+      //       await timer(250);
+
+      //       await page.click(searchButton);
+
+      //       await timer(250);
+
+      //       await getKeywordFourth(page, i, j, k);
+
+      //       await timer(250);
+      //     }
+      //   }
+
+      //   await timer(250);
+      // }
     }
   }
 }
@@ -247,7 +275,7 @@ function main() {
 
     await page.goto(`https://datalab.naver.com/shoppingInsight/sCategory.naver`);
 
-    await click(page);
+    await select(page);
 
     await browser.close();
 
